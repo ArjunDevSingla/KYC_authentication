@@ -18,6 +18,19 @@ class User(UserBase):
     class Config:
         orm_mode = True
 
+
+class Aadhar_base(BaseModel):
+    name: str
+    dob = str
+    gender = str
+    aadhaar_number = int
+
+
+class Aadhar(Aadhar_base):
+
+    class Config:
+        orm_mode = True
+
 # class ImgCreate(BaseModel):
 #     name: str
 

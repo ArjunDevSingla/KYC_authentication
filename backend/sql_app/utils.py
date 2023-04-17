@@ -80,8 +80,8 @@ def extract_details_from_aadhar(text):
     print("Aadhar Number:", aadhar_number)
     
     return {
-        "name" : name,
-        "dob" : date,
-        "gender" : gender,
-        "aadhaar_number" : aadhar_number
+        "name" : [name],
+        "dob" : [date],
+        "gender" : [gender],
+        "aadhaar_number" : [aadhar_number]
     }

@@ -6,11 +6,12 @@ from typing import List
 
 
 from . import crud, models, schema
-from . database import SessionLocal, engine
+from . database import SessionLocal, engine, SessionLocal2, engine2
 from fastapi.openapi.models import Response
 import shutil
 import io
 import numpy as np
+import pandas as pd
 import cv2
 import torch
 from matplotlib import pyplot as plt
@@ -18,6 +19,9 @@ from paddleocr import PaddleOCR,draw_ocr
 from . utils import get_cropped_image, extract_details_from_aadhar
 
 from passlib.context import CryptContext
+
+from . import database
+engine = database.engine2
 
 models.Base.metadata.create_all(bind = engine)
 
@@ -87,6 +91,13 @@ def get_db():
     finally:
         db.close()
 
+def get_db_2():
+    db2 = SessionLocal2()
+    try:
+        yield db2
+    finally:
+        db2.close()
+
 @app.post("/users/", response_model = schema.User)
 def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
     if user.username is None:
@@ -107,7 +118,7 @@ def login_user(user: schema.UserFetch, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     
 @app.post("/upload_img/")
-def add_image(file: UploadFile = File(...)):
+def add_image(file: UploadFile = File(...), db: Session = Depends(get_db_2)):
     with open(f'{file.filename}', 'wb') as buffer:
         shutil.copyfileobj(file.file, buffer)
         print(buffer)
@@ -115,8 +126,14 @@ def add_image(file: UploadFile = File(...)):
         img = cv2.imread(buffer.name)
         # print(img)
         info = give_detection_results(img)
-        print(info)
-
+        # print(info)
+        df = pd.DataFrame(info)
+        print(df.head())
+        # df.to_sql('aadhar_info', engine)
+        db_aadhar = models.Aadhar(name = df.name[0], dob = df.dob[0], gender = df.gender[0], aadhaar_number = df.aadhaar_number[0])
+        db.add(db_aadhar)
+        db.commit()
+        db.refresh(db_aadhar)
 
     return {"Details": info}
 

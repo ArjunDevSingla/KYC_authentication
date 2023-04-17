@@ -13,6 +13,15 @@ class User(Base):
 
     # images = relationship("AddImg", back_populates = "owner")
 
+class Aadhar(Base):
+    __tablename__ = "aadhar_info"
+
+    # index = Column(Integer, primary_key = True, index=True)
+    name = Column(String, index=True)
+    dob = Column(String, index=True)
+    gender = Column(String, index=True)
+    aadhaar_number = Column(Integer, primary_key = True, index=True)
+
 # class AddImg(Base):
 #     __tablename__ = "images"
 
